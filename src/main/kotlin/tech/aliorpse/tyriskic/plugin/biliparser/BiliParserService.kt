@@ -24,8 +24,6 @@ class BiliParserService {
         }
     }
 }
-
-
 sealed class BiliShortLinkParseResult {
     class Success(val bvid: String) : BiliShortLinkParseResult()
     object StatusCodeMismatch : BiliShortLinkParseResult()
