@@ -71,6 +71,7 @@ data class BiliVideoSourceResponse(
 @Serializable
 data class BiliVideoSource(
     val url: String,
+    val size: Long,
     @SerialName("backup_url")
     val backupUrl: List<String>? = null
 )

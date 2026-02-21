@@ -22,11 +22,11 @@ suspend fun main() {
             on<Event.MessageReceive> {
                 when (val data = it.data) {
                     is IncomingMessage.Group -> {
-                        println("Group message from ${data.senderId} in ${data.group.groupId}:")
+                        println("--- Group message from ${data.senderId} in ${data.group.groupId}:")
                         println(milkyJsonModule.encodeToString(data.segments))
                     }
                     is IncomingMessage.Friend -> {
-                        println("Private message from ${data.senderId}:")
+                        println("--- Private message from ${data.senderId}:")
                         println(milkyJsonModule.encodeToString(data.segments))
                     }
                     else -> {}

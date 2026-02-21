@@ -1,13 +1,17 @@
 package tech.aliorpse.tyriskic.plugin.biliparser
 
 import org.ntqqrev.milky.Event
+import org.ntqqrev.milky.IncomingMessage
 import org.ntqqrev.milky.IncomingSegment
 import org.ntqqrev.saltify.core.forward
 import org.ntqqrev.saltify.core.image
 import org.ntqqrev.saltify.core.node
 import org.ntqqrev.saltify.core.reply
+import org.ntqqrev.saltify.core.sendGroupMessageReaction
 import org.ntqqrev.saltify.core.text
+import org.ntqqrev.saltify.core.video
 import org.ntqqrev.saltify.dsl.createSaltifyPlugin
+import kotlin.io.encoding.Base64
 
 // 匹配 \? 是因为 LightApp 的 jsonPayload 会给键值的 / 前面加个 \
 val shortLinkRegex = Regex("""(b23\.tv|bili2233\.cn)\\?/\w{7}""")
@@ -55,9 +59,9 @@ val biliParser = createSaltifyPlugin("BiliParser") {
             else -> return@on
         }
 
-//        if (e.data is IncomingMessage.Group) {
-//            client.sendGroupMessageReaction(e.data.peerId, e.data.messageSeq, "60")
-//        }
+        if (e.data is IncomingMessage.Group) {
+            client.sendGroupMessageReaction(e.data.peerId, e.data.messageSeq, "60")
+        }
 
         val response = service.getVideoInfo(bvid)
         if (response.code != 0) {
@@ -67,6 +71,8 @@ val biliParser = createSaltifyPlugin("BiliParser") {
             }
             return@on
         }
+
+        val source = service.downloadVideo(response.data)
 
         val data = response.data
         val statistics = data.statistics
@@ -85,6 +91,11 @@ val biliParser = createSaltifyPlugin("BiliParser") {
                             收藏: ${statistics.favorite.formatted} | 评论: ${statistics.reply.formatted}
                         """.trimIndent()
                     )
+                }
+                if (source != null) {
+                    node(e.selfId, "Tyriskic") {
+                        video("base64://${Base64.encode(source)}", data.picture)
+                    }
                 }
                 node(e.selfId, "Tyriskic") {
                     text(
