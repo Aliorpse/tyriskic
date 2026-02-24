@@ -10,7 +10,7 @@ import org.ntqqrev.saltify.core.reply
 import org.ntqqrev.saltify.core.sendGroupMessageReaction
 import org.ntqqrev.saltify.core.text
 import org.ntqqrev.saltify.core.video
-import org.ntqqrev.saltify.dsl.createSaltifyPlugin
+import org.ntqqrev.saltify.dsl.SaltifyPlugin
 import kotlin.io.encoding.Base64
 
 // 匹配 \? 是因为 LightApp 的 jsonPayload 会给键值的 / 前面加个 \
@@ -19,7 +19,7 @@ val bvRegex = Regex("""BV1\w{9}""")
 
 private val service = BiliParserService()
 
-val biliParser = createSaltifyPlugin("BiliParser") {
+val biliParser = SaltifyPlugin("BiliParser") {
     on<Event.MessageReceive> { e ->
         val text = e.data.segments
             .filterIsInstance<IncomingSegment.Text>()
@@ -56,6 +56,7 @@ val biliParser = createSaltifyPlugin("BiliParser") {
                 }
                 return@on
             }
+
             else -> return@on
         }
 

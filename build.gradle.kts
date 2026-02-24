@@ -7,6 +7,7 @@ plugins {
 group = "tech.aliorpse.tyriskic"
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 

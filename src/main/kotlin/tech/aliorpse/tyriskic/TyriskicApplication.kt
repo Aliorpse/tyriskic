@@ -1,10 +1,12 @@
 package tech.aliorpse.tyriskic
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.ntqqrev.milky.Event
 import org.ntqqrev.milky.IncomingMessage
 import org.ntqqrev.milky.milkyJsonModule
 import org.ntqqrev.saltify.core.SaltifyApplication
-import org.ntqqrev.saltify.entity.SaltifyComponentType
+import org.ntqqrev.saltify.model.SaltifyComponentType
 import org.ntqqrev.saltify.util.coroutine.saltifyComponent
 import tech.aliorpse.tyriskic.plugin.biliparser.biliParser
 import java.io.PrintStream
@@ -15,6 +17,10 @@ suspend fun main() {
 
     SaltifyApplication {
         addressBase = "http://localhost:3355"
+
+        eventConnection {
+            maxReconnectionAttempts = Int.MAX_VALUE
+        }
 
         install(biliParser)
 
@@ -37,15 +43,25 @@ suspend fun main() {
         println("Tyriskic starting...")
         client.connectEvent()
 
-        client.exceptionFlow.collect { (context, e) ->
-            val component = context.saltifyComponent!!
+        coroutineScope {
+            launch {
+                client.exceptionFlow.collect { (context, e) ->
+                    val component = context.saltifyComponent!!
 
-            when (component.type) {
-                SaltifyComponentType.Application -> throw e
-                else -> println(
-                    "Component ${component.name}(${component.type}) occurred an exception: " +
-                        e.stackTraceToString()
-                )
+                    when (component.type) {
+                        SaltifyComponentType.Application -> throw e
+                        else -> println(
+                            "Component ${component.name}(${component.type}) occurred an exception: " +
+                                e.stackTraceToString()
+                        )
+                    }
+                }
+            }
+
+            launch {
+                client.eventConnectionStateFlow.collect {
+                    println("Connection state has changed to: $it")
+                }
             }
         }
     }
